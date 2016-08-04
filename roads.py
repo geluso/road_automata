@@ -1,3 +1,5 @@
+from random import choice
+
 board = '''
 +================================================+
 |................................................|
@@ -23,8 +25,6 @@ board = '''
 |................................................|
 +================================================+
 '''.strip()
-
-print(board)
 
 snake_eye = '''
 
@@ -56,7 +56,62 @@ center_down = '''
  #
 '''
 
-rules = '''
+rules = {
+  "....": [
+      "...."
+  ],
+  "...#": [
+    ".#.#",
+    "..##",
+    ".###"
+  ],
+  ".#..": [
+    ".#.#",
+    "##..",
+    "##.#"
+  ],
+  "#...": [
+    "##..",
+    "#.#.",
+    "###."
+  ],
+  "..#.": [
+    "#.#.",
+    "..##",
+    "#.##"
+  ],
+  "##..": [
+    "##..",
+    "###.",
+    "##.#"
+  ],
+  "..##": [
+    "..##",
+    "#.##",
+    ".###"
+  ],
+  "#.#.": [
+    "#.#.",
+    "###.",
+    "#.##"
+  ],
+  "#.#.": [
+    "#.#.",
+    "#.##",
+    "###."
+  ],
+  "###.": [
+    "###."
+  ],
+  "#.##": [
+    "#.##"
+  ],
+  "####": [
+    "####"
+  ]
+}
+
+doc_rules = '''
 
 .. ..
 .. ..
@@ -96,41 +151,47 @@ rules = '''
 
 '''
 
-def walk_cells(cells):
+def walk_board(board):
   irow = 0
   icol = 0
 
+  old_cells = board_to_cells(board)
+  new_cells = board_to_cells(board)
+
+  rows = len(old_cells)
+  cols = len(old_cells[0])
+
   while irow < rows - 1:
     while icol < cols - 1:
-      top = cells[irow][icol] + cells[irow][icol + 1]
-      bot = cells[irow + 1][icol] + cells[irow + 1][icol + 1]
+      top = old_cells[irow][icol] + old_cells[irow][icol + 1]
+      bot = old_cells[irow + 1][icol] + old_cells[irow + 1][icol + 1]
       unit = top + bot
-      replace_cells(cells, irow, icol, unit)
+      replace_cells(old_cells, new_cells, irow, icol, unit)
 
       icol += 1
     icol = 1
     irow += 1
-  return cells
+  return cells_to_board(new_cells)
 
-def replace_cells(cells, row, col, unit):
+def replace_cells(old_cells, new_cells, row, col, unit):
   new_unit = unit
 
-  #if unit == "....":
-  #  new_unit = "..#."
-
-  if unit == ".#..":
-    new_unit = ".#.#"
+  if unit in rules:
+    print(unit, "in rules")
+    new_unit = choice(rules[unit])
+  #if unit == ".#..":
+  #  new_unit = ".#.#"
 
   if unit != new_unit:
     print("changed")
-    cells[row][col] = new_unit[0]
-    cells[row][col + 1] = new_unit[1]
-    cells[row + 1][col] = new_unit[2]
-    cells[row + 1][col + 1] = new_unit[3]
-    print(cells[row][col], new_unit[0])
-    print(cells[row][col + 1], new_unit[1])
-    print(cells[row + 1][col], new_unit[2])
-    print(cells[row + 1][col + 1], new_unit[3])
+    new_cells[row][col] = new_unit[0]
+    new_cells[row][col + 1] = new_unit[1]
+    new_cells[row + 1][col] = new_unit[2]
+    new_cells[row + 1][col + 1] = new_unit[3]
+    print(old_cells[row][col], new_unit[0])
+    print(old_cells[row][col + 1], new_unit[1])
+    print(old_cells[row + 1][col], new_unit[2])
+    print(old_cells[row + 1][col + 1], new_unit[3])
 
 def board_to_cells(board):
   cells = [list(row.strip()) for row in board.split("\n")]
@@ -141,13 +202,13 @@ def cells_to_board(cells):
   board = "\n".join(cells)
   return board
 
-cells = board_to_cells(board)
-rows = len(cells)
-cols = len(cells[0])
-
-print("rows:", rows)
-print("cols:", cols)
-
-walk_cells(cells)
-board = cells_to_board(cells)
 print(board)
+print()
+
+again = True
+while again:
+  board = walk_board(board)
+  print(board)
+  print()
+
+  again = not bool(input("[n] to quit. [enter] to continue.]"))
